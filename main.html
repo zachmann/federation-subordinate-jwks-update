@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>OpenID Federation Subordinate JWKS Update 1.0 - draft 00</title>
+<meta content="Gabriel Zachmann" name="author">
+<meta content="
+       This specification is an extension to
+ . It defines two optional federation endpoints — the
+Subordinate JWKS Update Trigger Endpoint and the
+Subordinate JWKS Update Endpoint — with which a Subordinate Entity keeps the
+JWK Set published about it in Subordinate Statements up to date at its Superior
+Entities. The two endpoints complement each other: the Subordinate JWKS Update Trigger
+Endpoint informs a Superior that the Subordinate's Entity Configuration should
+be re-fetched, and the Subordinate JWKS Update Endpoint lets a Subordinate push its new
+federation keys to a Superior directly as a signed JWK Set. 
+    " name="description">
+<meta content="xml2rfc 3.16.0" name="generator">
+<meta content="security" name="keyword">
+<meta content="openid" name="keyword">
+<meta content="federation" name="keyword">
+<meta content="jwks" name="keyword">
+<meta content="key-rotation" name="keyword">
+<meta content="openid-federation-subordinate-jwks-update" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.16.0
+    Python 3.10.2
+    appdirs 1.4.4
+    ConfigArgParse 1.5.3
+    google-i18n-address 2.5.2
+    html5lib 1.1
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.2
+    MarkupSafe 2.1.2
+    pycountry 22.3.5
+    PyYAML 6.0
+    requests 2.28.2
+    setuptools 57.5.0
+    six 1.16.0
+    wcwidth 0.2.6
+-->
+<link href="./openid-federation-subordinate-jwks-update.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">/*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necessary during the development of the v3
+  formatters.
+
+*/
+
+/* fonts */
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans'); /* Sans-serif */
+@import url('https://fonts.googleapis.com/css?family=Noto+Serif'); /* Serif (print) */
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono'); /* Monospace */
+
+:root {
+  --font-sans: 'Noto Sans', Arial, Helvetica, sans-serif;
+  --font-serif: 'Noto Serif', 'Times', 'Times New Roman', serif;
+  --font-mono: 'Roboto Mono', Courier, 'Courier New', monospace;
+}
+
+@viewport {
+  zoom: 1.0;
+  width: extend-to-zoom;
+}
+@-ms-viewport {
+  width: extend-to-zoom;
+  zoom: 1.0;
+}
+/* general and mobile first */
+html {
+}
+body {
+  max-width: 90%;
+  margin: 1.5em auto;
+  color: #222;
+  background-color: #fff;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+}
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  margin: 1em 0 0.5em;
+  font-weight: bold;
+  line-height: 1.3;
+}
+#title {
+  clear: both;
+  border-bottom: 1px solid #ddd;
+  margin: 0 0 0.5em 0;
+  padding: 1em 0 0.5em;
+}
+.author {
+  padding-bottom: 4px;
+}
+h1 {
+  font-size: 26px;
+  margin: 1em 0;
+}
+h2 {
+  font-size: 22px;
+  margin-top: -20px;  /* provide offset for in-page anchors */
+  padding-top: 33px;
+}
+h3 {
+  font-size: 18px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h4 {
+  font-size: 16px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h5, h6 {
+  font-size: 14px;
+}
+#n-copyright-notice {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+}
+/* general structure */
+p {
+  padding: 0;
+  margin: 0 0 1em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+svg[font-family~="serif" i], svg [font-family~="serif" i] {
+  font-family: var(--font-serif);
+}
+svg[font-family~="sans-serif" i], svg [font-family~="sans-serif" i] {
+  font-family: var(--font-sans);
+}
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  display: table;
+  border: none;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.ulBare, li.ulBare {
+  margin-left: 0em !important;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+/* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a {
+  text-decoration: none;
+}
+a[href] {
+  color: #22e; /* Arlen: WCAG 2019 */
+}
+a[href]:hover {
+  background-color: #f2f2f2;
+}
+figcaption a[href],
+a[href].selfRef {
+  color: #222;
+}
+/* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+/* Figures */
+tt, code, pre {
+  background-color: #f9f9f9;
+  font-family: var(--font-mono);
+}
+pre {
+  border: 1px solid #eee;
+  margin: 0;
+  padding: 1em;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption {
+  font-style: italic;
+  margin: 0 0 1em 0;
+}
+@media screen {
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    max-width: calc(100% - 22px);
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 1.2em 2em;
+}
+blockquote {
+  background-color: #f9f9f9;
+  color: #111; /* Arlen: WCAG 2019 */
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid #eee;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #e9e9e9;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f5f5f5;
+}
+table caption {
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  color: #666; /* Arlen: AHDJ 2019 */
+  text-decoration: none;
+  visibility: hidden;
+  user-select: none;
+  -ms-user-select: none;
+  -o-user-select:none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+@media screen {
+  aside:hover > a.pilcrow,
+  p:hover > a.pilcrow,
+  blockquote:hover > a.pilcrow,
+  div:hover > a.pilcrow,
+  li:hover > a.pilcrow,
+  pre:hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: 0.9em;
+}
+#identifiers dt {
+  width: 3em;
+  clear: left;
+}
+#identifiers dd {
+  float: left;
+  margin-bottom: 0;
+}
+/* Fix PDF info block run off issue */
+@media print {
+  #identifiers dd {
+    float: none;
+  }
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #666; /* Arlen: WCAG 2019 */
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc  {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+nav.toc ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+nav.toc li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    -moz-column-count: 2;
+    -moz-column-gap: 20px;
+  }
+  .index ul ul {
+    -moz-column-count: 1;
+    -moz-column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  font-family: var(--font-sans);
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #9e2a00; /* Arlen: WCAG 2019 */
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  border-radius: 3px;
+}
+.cref {
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 1023px) {
+  body {
+    padding-top: 2em;
+  }
+  #title {
+    padding: 1em 0;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: -18px;  /* provide offset for in-page anchors */
+    padding-top: 38px;
+  }
+  #identifiers dd {
+    max-width: 60%;
+  }
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    border-bottom: 1px solid #ccc;
+  }
+  #toc h2 {
+    margin: -1px 0 0 0;
+    padding: 4px 0 4px 6px;
+    padding-right: 1em;
+    min-width: 190px;
+    font-size: 1.1em;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 6px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 1024px) {
+  body {
+    max-width: 724px;
+    margin: 42px auto;
+    padding-left: 1.5em;
+    padding-right: 29em;
+  }
+  #toc {
+    position: fixed;
+    top: 42px;
+    right: 42px;
+    width: 25%;
+    margin: 0;
+    padding: 0 1em;
+    z-index: 1;
+  }
+  #toc h2 {
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 1em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 0;
+    overflow: auto;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  .breakable pre {
+    break-inside: auto;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+/* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+/*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+  /* The following is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+  /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+}
+
+/* Changes introduced to fix issues found during implementation */
+/* Make sure links are clickable even if overlapped by following H* */
+a {
+  z-index: 2;
+}
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Leave room in document info to show Internet-Draft on one line */
+#identifiers dt {
+  width: 8em;
+}
+
+/* Don't waste quite as much whitespace between label and value in doc info */
+#identifiers dd {
+  margin-left: 1em;
+}
+
+/* Give floating toc a background color (needed when it's a div inside section */
+#toc {
+  background-color: white;
+}
+
+/* Make the collapsed ToC header render white on gray also when it's a link */
+@media screen and (max-width: 1023px) {
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+}
+
+/* Give the bottom of the ToC some whitespace */
+@media screen and (min-width: 1024px) {
+  #toc {
+    padding: 0 0 1em 1em;
+  }
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* prevent monospace from becoming overly large */
+tt, code, pre {
+  font-size: 95%;
+}
+
+/* Fix the height/width aspect for ascii art*/
+.sourcecode pre,
+.art-text pre {
+  line-height: 1.12;
+}
+
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin-right: 0.5em;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 30em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+caption a[href] {
+  color: #222;
+}
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+/* Tweak the invisible space above H* in order not to overlay links in text above */
+ h2 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 31px;
+ }
+ h3 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+ h4 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+/* Float artwork pilcrow to the right */
+@media screen {
+  .artwork a.pilcrow {
+    display: block;
+    line-height: 0.7;
+    margin-top: 0.15em;
+  }
+}
+/* Make pilcrows on dd visible */
+@media screen {
+  dd:hover > a.pilcrow {
+    visibility: visible;
+  }
+}
+/* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+.alignLeft.art-text,
+.alignCenter.art-text,
+.alignRight.art-text {
+   margin-bottom: 0;
+}
+.alignLeft,
+.alignCenter,
+.alignRight {
+  margin: 1em 0 0 0;
+}
+/* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+/* Styling for the external metadata */
+div#external-metadata {
+  background-color: #eee;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  display: none;
+}
+div#internal-metadata {
+  padding: 0.5em;                       /* to match the external-metadata padding */
+}
+/* Styling for title RFC Number */
+h1#rfcnum {
+  clear: both;
+  margin: 0 0 -1em;
+  padding: 1em 0 0 0;
+}
+/* Make .olPercent look the same as <ol><li> */
+dl.olPercent > dd {
+  margin-bottom: 0.25em;
+  min-height: initial;
+}
+/* Give aside some styling to set it apart */
+aside {
+  border-left: 1px solid #ddd;
+  margin: 1em 0 1em 2em;
+  padding: 0.2em 2em;
+}
+aside > dl,
+aside > ol,
+aside > ul,
+aside > table,
+aside > p {
+  margin-bottom: 0.5em;
+}
+/* Additional page break settings */
+@media print {
+  figcaption, table caption {
+    page-break-before: avoid;
+  }
+}
+/* Font size adjustments for print */
+@media print {
+  body  { font-size: 10pt;      line-height: normal; max-width: 96%; }
+  h1    { font-size: 1.72em;    padding-top: 1.5em; } /* 1*1.2*1.2*1.2 */
+  h2    { font-size: 1.44em;    padding-top: 1.5em; } /* 1*1.2*1.2 */
+  h3    { font-size: 1.2em;     padding-top: 1.5em; } /* 1*1.2 */
+  h4    { font-size: 1em;       padding-top: 1.5em; }
+  h5, h6 { font-size: 1em;      margin: initial; padding: 0.5em 0 0.3em; }
+}
+/* Sourcecode margin in print, when there's no pilcrow */
+@media print {
+  .artwork,
+  .artwork > pre,
+  .sourcecode {
+    margin-bottom: 1em;
+  }
+}
+/* Avoid narrow tables forcing too narrow table captions, which may render badly */
+table {
+  min-width: 20em;
+}
+/* ol type a */
+ol.type-a { list-style-type: lower-alpha; }
+ol.type-A { list-style-type: upper-alpha; }
+ol.type-i { list-style-type: lower-roman; }
+ol.type-I { list-style-type: lower-roman; }
+/* Apply the print table and row borders in general, on request from the RPC,
+and increase the contrast between border and odd row background slightly */
+table {
+  border: 1px solid #ddd;
+}
+td {
+  border-top: 1px solid #ddd;
+}
+tr {
+  break-inside: avoid;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f8f8f8;
+}
+/* Use style rules to govern display of the TOC. */
+@media screen and (max-width: 1023px) {
+  #toc nav { display: none; }
+  #toc.active nav { display: block; }
+}
+/* Add support for keepWithNext */
+.keepWithNext {
+  break-after: avoid-page;
+  break-after: avoid-page;
+}
+/* Add support for keepWithPrevious */
+.keepWithPrevious {
+  break-before: avoid-page;
+}
+/* Change the approach to avoiding breaks inside artwork etc. */
+figure, pre, table, .artwork, .sourcecode  {
+  break-before: auto;
+  break-after: auto;
+}
+/* Avoid breaks between <dt> and <dd> */
+dl {
+  break-before: auto;
+  break-inside: auto;
+}
+dt {
+  break-before: auto;
+  break-after: avoid-page;
+}
+dd {
+  break-before: avoid-page;
+  break-after: auto;
+  orphans: 3;
+  widows: 3
+}
+span.break, dd.break {
+  margin-bottom: 0;
+  min-height: 0;
+  break-before: auto;
+  break-inside: auto;
+  break-after: auto;
+}
+/* Undo break-before ToC */
+@media print {
+  #toc {
+    break-before: auto;
+  }
+}
+/* Text in compact lists should not get extra bottom margin space,
+   since that would makes the list not compact */
+ul.compact p, .ulCompact p,
+ol.compact p, .olCompact p {
+ margin: 0;
+}
+/* But the list as a whole needs the extra space at the end */
+section ul.compact,
+section .ulCompact,
+section ol.compact,
+section .olCompact {
+  margin-bottom: 1em;                    /* same as p not within ul.compact etc. */
+}
+/* The tt and code background above interferes with for instance table cell
+   backgrounds.  Changed to something a bit more selective. */
+tt, code {
+  background-color: transparent;
+}
+p tt, p code, li tt, li code {
+  background-color: #f8f8f8;
+}
+/* Tweak the pre margin -- 0px doesn't come out well */
+pre {
+   margin-top: 0.5px;
+}
+/* Tweak the compact list text */
+ul.compact, .ulCompact,
+ol.compact, .olCompact,
+dl.compact, .dlCompact {
+  line-height: normal;
+}
+/* Don't add top margin for nested lists */
+li > ul, li > ol, li > dl,
+dd > ul, dd > ol, dd > dl,
+dl > dd > dl {
+  margin-top: initial;
+}
+/* Elements that should not be rendered on the same line as a <dt> */
+/* This should match the element list in writer.text.TextWriter.render_dl() */
+dd > div.artwork:first-child,
+dd > aside:first-child,
+dd > figure:first-child,
+dd > ol:first-child,
+dd > div.sourcecode:first-child,
+dd > table:first-child,
+dd > ul:first-child {
+  clear: left;
+}
+/* fix for weird browser behaviour when <dd/> is empty */
+dt+dd:empty::before{
+  content: "\00a0";
+}
+/* Make paragraph spacing inside <li> smaller than in body text, to fit better within the list */
+li > p {
+  margin-bottom: 0.5em
+}
+/* Don't let p margin spill out from inside list items */
+li > p:last-of-type:only-child {
+  margin-bottom: 0;
+}
+</style>
+<link href="rfc-local.css" rel="stylesheet" type="text/css">
+</head>
+<body class="xml2rfc">
+<script src="metadata.min.js"></script>
+<table class="ears">
+<thead><tr>
+<td class="left"></td>
+<td class="center">openid-federation-subordinate-jwks-updat</td>
+<td class="right">October 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Zachmann</td>
+<td class="center">Standards Track</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">OpenID Connect Working Group</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-10-28" class="published">28 October 2026</time>
+    </dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">G. Zachmann</div>
+<div class="org">Karlsruhe Institute of Technology</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">OpenID Federation Subordinate JWKS Update 1.0 - draft 00</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This specification is an extension to
+<span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>. It defines two optional federation endpoints — the
+Subordinate JWKS Update Trigger Endpoint and the
+Subordinate JWKS Update Endpoint — with which a Subordinate Entity keeps the
+JWK Set published about it in Subordinate Statements up to date at its Superior
+Entities. The two endpoints complement each other: the Subordinate JWKS Update Trigger
+Endpoint informs a Superior that the Subordinate's Entity Configuration should
+be re-fetched, and the Subordinate JWKS Update Endpoint lets a Subordinate push its new
+federation keys to a Superior directly as a signed JWK Set.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-requirements-notation-and-c" class="internal xref">Requirements Notation and Conventions</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-key-rotation-procedure" class="internal xref">Key Rotation Procedure</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-validity-periods" class="internal xref">Validity Periods</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-entity-metadata" class="internal xref">Entity Metadata</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-subordinate-jwks-update-tri" class="internal xref">Subordinate JWKS Update Trigger Endpoint</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-request" class="internal xref">Request</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.1">
+                    <p id="section-toc.1-1.5.2.1.2.1.1"><a href="#section-5.1.1" class="auto internal xref">5.1.1</a>.  <a href="#name-client-authentication" class="internal xref">Client Authentication</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.2">
+                    <p id="section-toc.1-1.5.2.1.2.2.1"><a href="#section-5.1.2" class="auto internal xref">5.1.2</a>.  <a href="#name-without-client-authenticati" class="internal xref">Without Client Authentication</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-processing" class="internal xref">Processing</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-validation-requirements" class="internal xref">Validation Requirements</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-response" class="internal xref">Response</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.1">
+                    <p id="section-toc.1-1.5.2.4.2.1.1"><a href="#section-5.4.1" class="auto internal xref">5.4.1</a>.  <a href="#name-successful-response" class="internal xref">Successful Response</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.2">
+                    <p id="section-toc.1-1.5.2.4.2.2.1"><a href="#section-5.4.2" class="auto internal xref">5.4.2</a>.  <a href="#name-error-response" class="internal xref">Error Response</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-subordinate-jwks-update-end" class="internal xref">Subordinate JWKS Update Endpoint</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-request-2" class="internal xref">Request</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-processing-2" class="internal xref">Processing</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-response-2" class="internal xref">Response</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3.2.1">
+                    <p id="section-toc.1-1.6.2.3.2.1.1"><a href="#section-6.3.1" class="auto internal xref">6.3.1</a>.  <a href="#name-successful-response-2" class="internal xref">Successful Response</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3.2.2">
+                    <p id="section-toc.1-1.6.2.3.2.2.1"><a href="#section-6.3.2" class="auto internal xref">6.3.2</a>.  <a href="#name-error-response-2" class="internal xref">Error Response</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-error-response-format" class="internal xref">Error Response Format</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-expired-material-must-not-b" class="internal xref">Expired Material MUST NOT Be Accepted</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-notices" class="internal xref">Notices</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-document-history" class="internal xref">Document History</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">OpenID Federation 1.1 <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span> specifies that a Superior Entity
+(Trust Anchor or Intermediate) issues a Subordinate Statement for each of its
+Subordinate Entities and that this statement carries the Subordinate's
+federation keys in the <code>jwks</code> Claim. Trust Chains are resolved based
+on these statements.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">When a Subordinate Entity rotates its federation keys, this must be reflected
+in the <code>jwks</code> Claim of Subordinate Statements issued by the Superior Entities.
+If the Superior continues to issue statements including the old keys, the Subordinate's Entity Configuration
+can no longer be verified and therefore also Trust Chains involving that Entity break.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">To assure that a Superior always knows about the current JWK Set of its
+Subordinates, it may poll the
+Entity Configurations of its Subordinates without any involvement of
+the Subordinate: it periodically fetches the Entity Configuration of a
+Subordinate from the location defined in <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span> (typically
+<code>https://&lt;entity_id&gt;/.well-known/openid-federation</code>), compares the keys in the
+<code>jwks</code> Claim with its Stored JWKS, and updates the Stored JWKS when the keys
+have changed. This approach requires no support from the Subordinate and picks
+up key changes even when the Subordinate cannot reach its Superior.
+The details of a periodic polling approach, in particular the polling interval,
+are out of scope of this specification.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This specification defines two complementary mechanisms as an alternative to
+periodic polling by the Superior. With these mechanisms a Subordinate
+can keep the keys that its Superiors store about it up to date:<a href="#section-1-4" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-1-5.1">The <strong>Subordinate JWKS Update Trigger Endpoint</strong>
+(<code>federation_subordinate_jwks_update_trigger_endpoint</code>) lets a Subordinate signal to a
+Superior that the Superior should re-fetch the Subordinate's Entity
+Configuration and adopt the current keys.<a href="#section-1-5.1" class="pilcrow">¶</a>
+</li>
+        <li class="compact" id="section-1-5.2">The <strong>Subordinate JWKS Update Endpoint</strong> (<code>federation_subordinate_jwks_update_endpoint</code>) lets a
+Subordinate submit its new federation keys directly to a Superior as a signed
+JWK Set, without requiring the Superior to fetch anything.<a href="#section-1-5.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<div id="requirements-notation-and-conventions">
+<section id="section-1.1">
+        <h3 id="name-requirements-notation-and-c">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-requirements-notation-and-c" class="section-name selfRef">Requirements Notation and Conventions</a>
+        </h3>
+<p id="section-1.1-1">The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
+RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP
+14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they appear in all capitals, as shown here.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="terminology">
+<section id="section-2">
+      <h2 id="name-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<p id="section-2-1">This specification uses the terms "Entity", "Entity Configuration", "Federation
+Entity", "Federation Entity Key", "Subordinate Entity", "Superior Entity",
+"Trust Anchor", "Intermediate", "Subordinate Statement", and "Trust Chain" as
+defined in <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>. It uses the terms "JSON Web Token" (JWT),
+"JWT Claims Set", and "Claim" as defined in <span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>, "JSON Web Signature"
+(JWS) as defined in <span>[<a href="#RFC7515" class="cite xref">RFC7515</a>]</span>, the term "JSON Web Key Set" <span>[<a href="#RFC7517" class="cite xref">RFC7517</a>]</span>
+(referred to interchangeably as "JWK Set" and "JWKS" in this document; "JWKS"
+is also used in the names of the endpoints and of the "Stored JWKS"), and the
+notion of client authentication of the OAuth 2.0 framework <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>, on
+which the entity authentication of OpenID Federation builds.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">The term <strong>Stored JWKS</strong> refers to the copy of a Subordinate's federation keys
+that a Superior holds in order to include them in the Subordinate Statements it
+issues. A key in the Stored JWKS is <strong>expired</strong> if its <code>exp</code> member is present
+and its value is strictly in the past of the point in time at which the key is
+evaluated. A key without an <code>exp</code> member is
+never considered expired on the basis of the <code>exp</code> member.<a href="#section-2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="key-rotation-procedure">
+<section id="section-3">
+      <h2 id="name-key-rotation-procedure">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-key-rotation-procedure" class="section-name selfRef">Key Rotation Procedure</a>
+      </h2>
+<p id="section-3-1">A Superior keeps, for each of its Subordinate Entities, a copy of the last set
+of federation keys it has adopted — the <strong>Stored JWKS</strong> — and uses it for two
+purposes: to publish the Subordinate's keys in Subordinate Statements, and to
+verify documents presented by the Subordinate, in particular the Subordinate's
+Entity Configuration and the signed JWK Sets submitted to the Subordinate JWKS
+Update Endpoint.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">An expired or otherwise not valid key MUST NOT be used to verify a document
+presented by a Subordinate. The mechanisms of this specification therefore
+cannot be used to rotate keys with an already-expired, revoked or otherwise not
+valid key: a Subordinate that rotates its keys MUST present its new key (or its
+new Entity Configuration) in a document that is signed with a Stored JWKS key
+that is <strong>not expired</strong>, and it MUST do so before the signing key expires. If
+there is no valid key in the Stored JWKS, the new JWKS MUST be communicated in
+another way that is out of scope of this specification.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3">The following normative procedure MUST be followed, in the order given, by a
+Subordinate that rotates its federation keys with the mechanisms of this
+specification, and by its Superior. The
+procedure MUST be completed while the old key is still valid; the validity
+periods of the documents involved MUST additionally be taken into account, see
+<a href="#validity-periods">Validity Periods</a>.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3-4">
+<li id="section-3-4.1">
+          <p id="section-3-4.1.1"><strong>Generate the new key(s).</strong> The Subordinate MUST generate a new federation
+key (or key set) and assign each new key a unique <code>kid</code> that has not been
+used by this Subordinate before. The new key(s) MUST NOT be used for signing
+before step 6.<a href="#section-3-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.2">
+          <p id="section-3-4.2.1"><strong>Publish the new key(s) alongside the old key(s).</strong> The Subordinate MUST
+publish an Entity Configuration whose <code>jwks</code> Claim contains both the new
+key(s) and the old key(s) that are still valid, and that is signed with a
+key the Superior currently accepts, i.e., a key from the Stored JWKS that is
+not expired (the old key). The Subordinate MUST continue to sign its Entity
+Configuration with the old key at least until the release time <code>T</code> defined
+in <a href="#validity-periods">Validity Periods</a>, so that cached copies of the
+Entity Configuration that do not contain the new key(s) remain verifiable.<a href="#section-3-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.3">
+          <p id="section-3-4.3.1"><strong>Notify the Superior.</strong> The Subordinate MUST notify the Superior of the new
+key(s) by one of the following means:<a href="#section-3-4.3.1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-3-4.3.2.1">The Subordinate creates a signed JWK Set containing all new and old
+key(s). This JWK Set SHOULD be the same as the one published in the Entity
+Configuration (step 2). The JWK Set MUST be signed with an old key. The
+Subordinate sends the JWK Set to the Subordinate JWKS Update Endpoint; or<a href="#section-3-4.3.2.1" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-3-4.3.2.2">the Subordinate sends a request to the Subordinate JWKS Update Trigger
+Endpoint, which causes the Superior to re-fetch the Entity Configuration
+of step 2; or<a href="#section-3-4.3.2.2" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-3-4.3.2.3">if the Superior supports neither endpoint, the Subordinate waits for the
+Superior's next periodic poll (see <a href="#introduction">Introduction</a>).<a href="#section-3-4.3.2.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+</li>
+        <li id="section-3-4.4">
+          <p id="section-3-4.4.1"><strong>The Superior adopts the new key(s).</strong> The Superior MUST validate the
+signed JWK Set or the re-fetched Entity Configuration as required by
+<a href="#update-processing">Processing</a> and <a href="#validation-requirements">Validation Requirements</a> and, on success, MUST include the
+new key(s) in its Stored JWKS. Subordinate Statements issued by the Superior
+after the adoption MUST contain the new key(s). The Subordinate Statements
+still MUST contain the old key(s) until the Subordinate has switched to the
+new signing key (step 6).<a href="#section-3-4.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.5">
+          <p id="section-3-4.5.1"><strong>Confirm adoption.</strong> The Subordinate MUST consider the new key(s) adopted
+only after it has received <code>204 No Content</code> from the Subordinate JWKS Update
+Endpoint, after the response of the Subordinate JWKS Update Trigger Endpoint
+indicated that the Stored JWKS has been updated, or after it has observed
+the new key(s) in a Subordinate Statement issued by the Superior. After the
+adoption has been confirmed, the Subordinate MUST NOT yet switch to the new
+signing key (step 6): it MUST wait until the release time <code>T</code> defined in
+<a href="#validity-periods">Validity Periods</a>, so that other entities no longer rely
+on cached copies of the Entity Configuration or of the Subordinate
+Statements that do not contain the new key(s).<a href="#section-3-4.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.6">
+          <p id="section-3-4.6.1"><strong>Switch signature.</strong> At the release time <code>T</code> (see <a href="#validity-periods">Validity
+Periods</a>), the Subordinate MUST sign all subsequent
+documents — in particular its Entity Configuration and any further signed
+JWK Sets — with the new key(s).<a href="#section-3-4.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.7">
+          <p id="section-3-4.7.1"><strong>Phase out the old key(s).</strong> The Subordinate MAY keep the old key(s) in its
+Entity Configuration for a transition period, but MUST remove them from the
+Entity Configuration once they have expired.<a href="#section-3-4.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.8">
+          <p id="section-3-4.8.1"><strong>Preserve verifiability of old material.</strong> For documents that were signed
+with the old key(s) — for example Entity Configurations or Subordinate
+Statements predating the rotation — to remain verifiable, the Subordinate
+MAY publish the old key(s) at its historical keys endpoint as defined in
+<span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>.<a href="#section-3-4.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.9">
+          <p id="section-3-4.9.1"><strong>The Superior phases out the old key(s).</strong> The Superior MUST NOT include
+the old key(s) in Subordinate Statements once they have expired.<a href="#section-3-4.9.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+<p id="section-3-5">A Superior MAY retain expired keys in its Stored JWKS (for example for
+historical purposes) but MUST NOT use them for the verification
+of documents presented by the Subordinate, and MUST NOT include them in
+Subordinate Statements, whose <code>jwks</code> Claim MUST contain only keys that are not
+expired at the time the statement is issued.<a href="#section-3-5" class="pilcrow">¶</a></p>
+<div id="validity-periods">
+<section id="section-3.1">
+        <h3 id="name-validity-periods">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-validity-periods" class="section-name selfRef">Validity Periods</a>
+        </h3>
+<p id="section-3.1-1"><strong>Release time.</strong> Other entities may hold copies of the documents involved
+that predate the rotation: an Entity Configuration that was fetched before the
+new key(s) were published, and Subordinate Statements that were obtained before
+the Superior included the new key(s). Such copies remain in circulation for
+the validity period of the respective document. The Subordinate
+MUST continue to sign its Entity Configuration with the old key (step 2) and
+MUST NOT switch to the new signing key (step 6) until those copies have expired
+and Entities had the opportunity to fetch the new keys.
+The Superior MUST continue to include the old key(s) in Subordinate Statements
+(step 4) until the Subordinate has switched to the new signing key (step 6).<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">The Subordinate MUST therefore keep the old key usable until the <strong>release
+time</strong> <code>T</code>:<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.1-3">
+<pre>T = max( t_ec + L_ec ,  t_stmt + L_stmt )
+</pre><a href="#section-3.1-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3.1-4">where<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-3.1-5.1">
+            <code>t_ec</code> is the time at which the Subordinate first issued an Entity
+Configuration that includes the new key(s) (step 2), and <code>L_ec</code> is the
+validity period of Entity Configurations issued by the Subordinate;<a href="#section-3.1-5.1" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-3.1-5.2">
+            <code>t_stmt</code> is the time at which the Superior first issued a Subordinate
+Statement that includes the new key(s) (step 4), and <code>L_stmt</code> is the
+validity period of Subordinate Statements issued by the Superior for this
+Subordinate.<a href="#section-3.1-5.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.1-6">The Subordinate MUST continue to sign its Entity Configuration with the old
+key (step 2) and MUST NOT switch to signing with the new key (step 6) before
+the release time <code>T</code>.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
+<p id="section-3.1-7">If the lifetime of Entity Configurations issued by the Subordinate is not
+static the Subordinate still MUST ensure that all Entity Configurations issued
+before the new key(s) were published are expired before switching to the new
+signing key. The same applies to the lifetime of the Subordinate Statements
+issued by the Superior: if the lifetime of Subordinate Statements issued by the Superior is not
+static the Subordinate still MUST ensure that all Subordinate Statements issued
+before the new key(s) were included are expired before switching to the new
+signing key.<a href="#section-3.1-7" class="pilcrow">¶</a></p>
+<p id="section-3.1-8">For periodic, scheduled rotation it is RECOMMENDED that the keys a Subordinate
+publishes carry <code>iat</code>, <code>nbf</code>, and <code>exp</code> members (as defined in <span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>).
+The <code>exp</code> member determines whether a key is still valid and enables the
+Superior to exclude expired keys when issuing Subordinate Statements (step 9).
+A key MUST NOT be used after its <code>exp</code> and MUST NOT be used before its <code>nbf</code>.<a href="#section-3.1-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="entity-metadata">
+<section id="section-4">
+      <h2 id="name-entity-metadata">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-entity-metadata" class="section-name selfRef">Entity Metadata</a>
+      </h2>
+<p id="section-4-1">A Superior publishes the endpoints defined by this specification in the
+<code>federation_entity</code> metadata of its Entity Configuration, using the
+<code>federation_subordinate_jwks_update_trigger_endpoint</code> and <code>federation_subordinate_jwks_update_endpoint</code>
+members. The endpoints MUST use the <code>https</code> scheme and MAY include port, path, and query parameter components encoded in <code>application/x-www-form-urlencoded</code> format. They MUST NOT contain a fragment component.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">The following is a non-normative example of an Entity Configuration payload
+for a Superior that advertises both endpoints:<a href="#section-4-2" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-4-3">
+<pre>{
+  "iss": "https://ta.example.org",
+  "sub": "https://ta.example.org",
+  "iat": 1590000000,
+  "exp": 1590086400,
+  "jwks": {
+    "keys": [
+      {
+        "kty": "RSA",
+        "kid": "key1",
+        "use": "sig",
+        "n": "n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUBZdR8_KuKPEHLd4rHVTeT",
+        "e": "AQAB"
+      }
+    ]
+  },
+  "metadata": {
+    "federation_entity": {
+      "federation_fetch_endpoint": "https://ta.example.org/fetch",
+      "federation_subordinate_jwks_update_trigger_endpoint": "https://ta.example.org/jwks/update-trigger",
+      "federation_subordinate_jwks_update_endpoint": "https://ta.example.org/jwks/update"
+    }
+  }
+}
+</pre><a href="#section-4-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="trigger-endpoint">
+<section id="section-5">
+      <h2 id="name-subordinate-jwks-update-tri">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-subordinate-jwks-update-tri" class="section-name selfRef">Subordinate JWKS Update Trigger Endpoint</a>
+      </h2>
+<p id="section-5-1">The Subordinate JWKS Update Trigger Endpoint is an optional endpoint published by a Superior
+Entity. It allows a Subordinate Entity to request that the Superior re-fetch the
+Subordinate's Entity Configuration from the location defined in
+<span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span> (typically <code>https://&lt;entity_id&gt;/.well-known/openid-federation</code>)
+and update the Stored JWKS for that Subordinate when the keys have changed.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="request">
+<section id="section-5.1">
+        <h3 id="name-request">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-request" class="section-name selfRef">Request</a>
+        </h3>
+<p id="section-5.1-1">The request MUST be an HTTP <code>POST</code>. The target Subordinate is identified either
+by client authentication or by a <code>sub</code> parameter, as follows.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<div id="client-authentication">
+<section id="section-5.1.1">
+          <h4 id="name-client-authentication">
+<a href="#section-5.1.1" class="section-number selfRef">5.1.1. </a><a href="#name-client-authentication" class="section-name selfRef">Client Authentication</a>
+          </h4>
+<p id="section-5.1.1-1">The endpoint MAY require client authentication. When client authentication is
+required, the Subordinate MUST authenticate with the <code>private_key_jwt</code> client
+authentication method using its federation keys, as defined in
+<span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>. The authenticated Subordinate is the target of the
+request; any <code>sub</code> parameter in the request body is ignored.<a href="#section-5.1.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="without-client-authentication">
+<section id="section-5.1.2">
+          <h4 id="name-without-client-authenticati">
+<a href="#section-5.1.2" class="section-number selfRef">5.1.2. </a><a href="#name-without-client-authenticati" class="section-name selfRef">Without Client Authentication</a>
+          </h4>
+<p id="section-5.1.2-1">When the endpoint does not require client authentication, the target
+Subordinate is identified by the <code>sub</code> parameter, whose value MUST be the
+Subordinate's Entity Identifier. The request body is encoded in
+<code>application/x-www-form-urlencoded</code> format.<a href="#section-5.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.1.2-2">The following is a non-normative example of a request:<a href="#section-5.1.2-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1.2-3">
+<pre>POST /jwks/update-trigger HTTP/1.1
+Host: ta.example.org
+Content-Type: application/x-www-form-urlencoded
+
+sub=https%3A%2F%2Fsub.example.org
+</pre><a href="#section-5.1.2-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="processing">
+<section id="section-5.2">
+        <h3 id="name-processing">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-processing" class="section-name selfRef">Processing</a>
+        </h3>
+<p id="section-5.2-1">Upon receiving a request, the Superior:<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="compact type-1" id="section-5.2-2">
+<li id="section-5.2-2.1">determines the target Subordinate, either from the authenticated client
+entity or from the <code>sub</code> parameter;<a href="#section-5.2-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.2-2.2">verifies that the target is a known Subordinate and is eligible for updates;<a href="#section-5.2-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.2-2.3">fetches the Entity Configuration of the target from the location defined in
+<span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>;<a href="#section-5.2-2.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.2-2.4">validates the fetched Entity Configuration (see <a href="#validation-requirements">Validation
+Requirements</a>);<a href="#section-5.2-2.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.2-2.5">compares the keys in the validated Entity Configuration with the Stored
+JWKS; if they differ, updates the Stored JWKS to the JWK Set in the <code>jwks</code>
+Claim of the Subordinate's Entity Configuration and uses the updated Stored
+JWKS in subsequent Subordinate Statements issued by the Superior;<a href="#section-5.2-2.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.2-2.6">responds to the request.<a href="#section-5.2-2.6" class="pilcrow">¶</a>
+</li>
+        </ol>
+</section>
+</div>
+<div id="validation-requirements">
+<section id="section-5.3">
+        <h3 id="name-validation-requirements">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-validation-requirements" class="section-name selfRef">Validation Requirements</a>
+        </h3>
+<p id="section-5.3-1">For the Subordinate JWKS Update Trigger Endpoint, the fetched Entity Configuration is valid
+if and only if all of the following hold:<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="compact type-1" id="section-5.3-2">
+<li id="section-5.3-2.1">The Entity Configuration MUST be a signed JWT.<a href="#section-5.3-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.3-2.2">The Entity Configuration MUST have a <code>typ</code> header parameter with the value <code>entity-statement+jwt</code>.<a href="#section-5.3-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.3-2.3">The Entity Configuration MUST have an <code>alg</code> (algorithm) header parameter with a value that is an acceptable JWS signing algorithm; it MUST NOT be <code>none</code>.<a href="#section-5.3-2.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.3-2.4">The Entity Identifier of the Subordinate MUST match the value of the <code>sub</code> (subject) Claim.<a href="#section-5.3-2.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.3-2.5">The Entity Identifier of the Subordinate MUST match the value of the <code>iss</code> (issuer) Claim.<a href="#section-5.3-2.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.3-2.6">The current time MUST be after the time represented by the <code>iat</code> (issued at) Claim (possibly allowing for some small leeway to account for clock skew).<a href="#section-5.3-2.6" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.3-2.7">The current time MUST be before the time represented by the <code>exp</code> (expiration) Claim (possibly allowing for some small leeway to account for clock skew).<a href="#section-5.3-2.7" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.3-2.8">The <code>jwks</code> (JWK Set) Claim MUST be present, with a value that is a valid JWK Set <span>[<a href="#RFC7517" class="cite xref">RFC7517</a>]</span>.<a href="#section-5.3-2.8" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.3-2.9">The Entity Configuration's kid (Key ID) header parameter value MUST be a non-zero length string and MUST exactly match the kid value for a key in the Stored JWKS for the Subordinate, using only keys that are <strong>not expired</strong>.<a href="#section-5.3-2.9" class="pilcrow">¶</a>
+</li>
+          <li id="section-5.3-2.10">The Entity Configuration's signature MUST validate using the key from the Stored JWKS identified by the kid value.<a href="#section-5.3-2.10" class="pilcrow">¶</a>
+</li>
+        </ol>
+<p id="section-5.3-3">If any of these conditions does not hold, the Superior MUST NOT update the
+Stored JWKS.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="response">
+<section id="section-5.4">
+        <h3 id="name-response">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-response" class="section-name selfRef">Response</a>
+        </h3>
+<div id="successful-response">
+<section id="section-5.4.1">
+          <h4 id="name-successful-response">
+<a href="#section-5.4.1" class="section-number selfRef">5.4.1. </a><a href="#name-successful-response" class="section-name selfRef">Successful Response</a>
+          </h4>
+<p id="section-5.4.1-1">A successful response MUST use the HTTP status code 200 and the content type <code>application/json</code>.<a href="#section-5.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.4.1-2">The response is a JSON object with the following Claims:<a href="#section-5.4.1-2" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-5.4.1-3.1">
+              <strong>sub</strong>: REQUIRED. The Entity Identifier of the target Subordinate, i.e., the
+Subordinate whose Stored JWKS was evaluated. Its value MUST equal the Entity
+Identifier determined during request processing.<a href="#section-5.4.1-3.1" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-5.4.1-3.2">
+              <strong>changed</strong>: REQUIRED. A boolean indicating whether the Superior replaced its
+Stored JWKS for the Subordinate. <code>true</code> means the keys in the validated
+Entity Configuration differed from the Stored JWKS and the Stored JWKS was
+replaced; <code>false</code> means the keys are identical and the Stored JWKS was left
+unchanged.<a href="#section-5.4.1-3.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-5.4.1-4">The following is a non-normative example of a successful response:<a href="#section-5.4.1-4" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-5.4.1-5">
+<pre>{
+  "sub": "https://sub.example.org",
+  "changed": true
+}
+</pre><a href="#section-5.4.1-5" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="trigger-error-response">
+<section id="section-5.4.2">
+          <h4 id="name-error-response">
+<a href="#section-5.4.2" class="section-number selfRef">5.4.2. </a><a href="#name-error-response" class="section-name selfRef">Error Response</a>
+          </h4>
+<p id="section-5.4.2-1">On failure, the Superior responds with an HTTP error status code and an error
+response in the format defined in <a href="#error-response-format">Error Response Format</a>. The
+following error codes are used by this endpoint:<a href="#section-5.4.2-1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-5.4.2-2.1">
+              <strong>invalid_request</strong>: The request is malformed, for example the <code>sub</code>
+parameter is missing or the request body cannot be parsed. The HTTP response
+status code SHOULD be 400 (Bad Request).<a href="#section-5.4.2-2.1" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-5.4.2-2.2">
+              <strong>invalid_client</strong>: The fetched Entity Configuration could not be
+authenticated against the Stored JWKS, either because a signature
+verification failed or because the Stored JWKS contains no key that is not
+expired. The HTTP response status code SHOULD be 401 (Unauthorized).<a href="#section-5.4.2-2.2" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-5.4.2-2.3">
+              <strong>not_found</strong>: The target Subordinate is not known to the Superior or is not
+eligible for updates. The HTTP response status code SHOULD be 404 (Not
+Found).<a href="#section-5.4.2-2.3" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-5.4.2-2.4">
+              <strong>server_error</strong>: The Entity Configuration could not be fetched from the
+Subordinate, or the fetched Entity Configuration is invalid (for example, it
+is expired, has an <code>iss</code>/<code>sub</code> mismatch, or is malformed). The HTTP response
+status code SHOULD be 502 (Bad Gateway).<a href="#section-5.4.2-2.4" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="update-endpoint">
+<section id="section-6">
+      <h2 id="name-subordinate-jwks-update-end">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-subordinate-jwks-update-end" class="section-name selfRef">Subordinate JWKS Update Endpoint</a>
+      </h2>
+<p id="section-6-1">The Subordinate JWKS Update Endpoint is an optional endpoint published by a Superior Entity.
+It allows a Subordinate Entity to push its new federation keys to the Superior
+directly as a signed JWK Set, replacing the Stored JWKS for that Subordinate.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="update-endpoint-request">
+<section id="section-6.1">
+        <h3 id="name-request-2">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-request-2" class="section-name selfRef">Request</a>
+        </h3>
+<p id="section-6.1-1">The request MUST be an HTTP <code>POST</code> with content type <code>application/jwk-set+jwt</code>.
+The request body is a signed JSON Web Token in compact serialization, reusing
+the signed JWK Set format defined for the <code>signed_jwks_uri</code> in
+<span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>. The JWT MUST have a JOSE header with a <code>typ</code> value of
+<code>jwk-set+jwt</code> and a <code>kid</code> identifying the signing key.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">The JWT payload contains the following Claims:<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-6.1-3.1">
+            <strong>keys</strong>: REQUIRED. A JSON array of JWK values - the Subordinate's new
+federation key set. Each key MUST have a unique, non-empty <code>kid</code>.<a href="#section-6.1-3.1" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-6.1-3.2">
+            <strong>iss</strong>: REQUIRED. The issuer - the Subordinate's Entity Identifier.<a href="#section-6.1-3.2" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-6.1-3.3">
+            <strong>sub</strong>: REQUIRED. The owner of the keys - the Subordinate's Entity
+Identifier, equal to <code>iss</code>.<a href="#section-6.1-3.3" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-6.1-3.4">
+            <strong>iat</strong>: OPTIONAL. The time at which the signed JWK Set was issued. It is
+evaluated only at acceptance time by the Subordinate JWKS Update Endpoint
+(the Superior MUST NOT accept a signed JWK Set whose <code>iat</code> is in the future)
+and carries no meaning beyond that instant.<a href="#section-6.1-3.4" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-6.1-3.5">
+            <strong>exp</strong>: OPTIONAL. The time at which the signed JWK Set expires. It is
+evaluated only at acceptance time by the Subordinate JWKS Update Endpoint
+(the Superior MUST NOT accept a signed JWK Set whose <code>exp</code> is in the past)
+and carries no meaning beyond that instant; in particular, it is NOT the
+expiration time of the keys in the <code>keys</code> Claim, which is governed by the
+<code>exp</code> member of each individual JWK.<a href="#section-6.1-3.5" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-6.1-4">The Subordinate JWKS Update Endpoint does not use client authentication for requests. Instead, the
+signature on the signed JWK Set is the authentication mechanism: the Superior
+only accepts the request if the signature verifies against the Subordinate's
+Stored JWKS. This is described in <a href="#update-processing">Processing</a>.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="update-processing">
+<section id="section-6.2">
+        <h3 id="name-processing-2">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-processing-2" class="section-name selfRef">Processing</a>
+        </h3>
+<p id="section-6.2-1">Upon receiving a request, the Superior:<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="compact type-1" id="section-6.2-2">
+<li id="section-6.2-2.1">verifies the <code>Content-Type</code> header and that the body parses as a signed JWK
+Set (with the correct <code>typ</code> header);<a href="#section-6.2-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.2-2.2">reads the <code>sub</code> Claim to determine the target Subordinate and verifies it
+is a known and eligible Subordinate;<a href="#section-6.2-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.2-2.3">verifies that <code>iss</code> equals <code>sub</code>;<a href="#section-6.2-2.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.2-2.4">verifies the signature of the signed JWK Set against the Stored JWKS of the
+Subordinate, using only keys that are <strong>not expired</strong>;<a href="#section-6.2-2.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.2-2.5">if the signed JWK Set carries an <code>exp</code> Claim, verifies that it is not in
+the past;<a href="#section-6.2-2.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.2-2.6">if the signed JWK Set carries an <code>iat</code> Claim, verifies that it is not in
+the future;<a href="#section-6.2-2.6" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.2-2.7">either replaces the Stored JWKS with the <code>keys</code> from the signed JWK Set,
+or, if the Superior supports deferred updates, holds the signed JWK Set
+pending manual approval without replacing the Stored JWKS. Which of the two
+the Superior performs determines the response, see
+<a href="#update-endpoint-response">Response</a>.<a href="#section-6.2-2.7" class="pilcrow">¶</a>
+</li>
+        </ol>
+<p id="section-6.2-3">A signed JWK Set that is held pending approval MUST NOT be used to replace the
+Stored JWKS, MUST NOT be used to verify documents presented by the Subordinate,
+and MUST NOT be included in Subordinate Statements until it has been approved.
+The approval process itself, including how the approver is notified and how
+approval is granted or denied, is out of scope of this specification. A
+Superior MAY discard a signed JWK Set that is pending approval at any time;
+whether a pending signed JWK Set eventually expires is a matter for the
+approval process.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="update-endpoint-response">
+<section id="section-6.3">
+        <h3 id="name-response-2">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-response-2" class="section-name selfRef">Response</a>
+        </h3>
+<div id="successful-response-1">
+<section id="section-6.3.1">
+          <h4 id="name-successful-response-2">
+<a href="#section-6.3.1" class="section-number selfRef">6.3.1. </a><a href="#name-successful-response-2" class="section-name selfRef">Successful Response</a>
+          </h4>
+<p id="section-6.3.1-1">On success, the Superior responds either with HTTP status <code>204 No Content</code>
+when it has replaced the Stored JWKS, or with <code>202 Accepted</code> when it has
+accepted the signed JWK Set but the update awaits manual approval and the
+Stored JWKS has not been replaced. In both cases the response MUST NOT contain
+a body.<a href="#section-6.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.3.1-2">A Subordinate that receives <code>202 Accepted</code> MUST NOT yet rely on the new keys
+being in effect: the Superior will continue to verify documents and issue
+Subordinate Statements with the previous keys until the update has been
+approved. The Subordinate MUST keep using its previous federation key for
+signing until it observes the new keys in a Subordinate Statement issued by
+the Superior.<a href="#section-6.3.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="update-error-response">
+<section id="section-6.3.2">
+          <h4 id="name-error-response-2">
+<a href="#section-6.3.2" class="section-number selfRef">6.3.2. </a><a href="#name-error-response-2" class="section-name selfRef">Error Response</a>
+          </h4>
+<p id="section-6.3.2-1">On failure, the Superior responds with an HTTP error status code and an error
+response in the format defined in <a href="#error-response-format">Error Response Format</a>. The
+following error codes are used by this endpoint:<a href="#section-6.3.2-1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-6.3.2-2.1">
+              <strong>invalid_request</strong>: The request body is not a well-formed signed JWK Set,
+the <code>iss</code> and <code>sub</code> Claims differ, a <code>kid</code> is missing or duplicated, or a
+REQUIRED Claim is absent. The HTTP response status code SHOULD be 400 (Bad
+Request).<a href="#section-6.3.2-2.1" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-6.3.2-2.2">
+              <strong>invalid_client</strong>: The signature could not be verified against the
+Subordinate's Stored JWKS, including the case where every stored key is
+expired. The HTTP response status code SHOULD be 401 (Unauthorized).<a href="#section-6.3.2-2.2" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-6.3.2-2.3">
+              <strong>not_found</strong>: The target Subordinate is not known to the Superior or is not
+eligible for updates. The HTTP response status code SHOULD be 404 (Not
+Found).<a href="#section-6.3.2-2.3" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-6.3.2-2.4">
+              <strong>unsupported_media_type</strong>: The <code>Content-Type</code> of the request is not
+<code>application/jwk-set+jwt</code>. The HTTP response status code SHOULD be 415
+(Unsupported Media Type).<a href="#section-6.3.2-2.4" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="error-response-format">
+<section id="section-7">
+      <h2 id="name-error-response-format">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-error-response-format" class="section-name selfRef">Error Response Format</a>
+      </h2>
+<p id="section-7-1">If a request cannot be processed, the response body MUST be a JSON object with
+the content type <code>application/json</code>. In compliance with <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> and
+<span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>, the following standardized error format MUST be used:<a href="#section-7-1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-7-2.1">
+          <strong>error</strong>: (REQUIRED) A single ASCII error code. Error codes in the IANA
+"OAuth Extensions Error Registry" <span>[<a href="#IANA.OAuth.Parameters" class="cite xref">IANA.OAuth.Parameters</a>]</span> MAY be used; in
+addition, this specification uses the error codes defined for the respective
+endpoints below.<a href="#section-7-2.1" class="pilcrow">¶</a>
+</li>
+        <li class="compact" id="section-7-2.2">
+          <strong>error_description</strong>: (REQUIRED) Human-readable text providing additional
+information used to assist the developer in understanding the error that
+occurred.<a href="#section-7-2.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-7-3">The following is a non-normative example of an error response:<a href="#section-7-3" class="pilcrow">¶</a></p>
+<div class="lang-http sourcecode" id="section-7-4">
+<pre>400 Bad Request
+Content-Type: application/json
+
+{
+  "error": "invalid_request",
+  "error_description": "The sub parameter is required but missing."
+}
+</pre><a href="#section-7-4" class="pilcrow">¶</a>
+</div>
+<p id="section-7-5">The error codes used by the Subordinate JWKS Update Trigger Endpoint are
+defined in <a href="#trigger-error-response">Trigger Endpoint Error Response</a>, and
+those used by the Subordinate JWKS Update Endpoint in <a href="#update-error-response">Update Endpoint Error
+Response</a>.<a href="#section-7-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-8">
+      <h2 id="name-security-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-8-1">The security considerations of OpenID Federation 1.1 <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>
+apply. This specification adds the following considerations.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<div id="expired-material-must-not-be-accepted">
+<section id="section-8.1">
+        <h3 id="name-expired-material-must-not-b">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-expired-material-must-not-b" class="section-name selfRef">Expired Material MUST NOT Be Accepted</a>
+        </h3>
+<p id="section-8.1-1">Both endpoints MUST reject requests that cannot be authenticated with a
+not expired key, and the Subordinate JWKS Update Trigger Endpoint MUST reject an expired or
+otherwise invalid Entity Configuration. Accepting expired material would allow
+a Subordinate (or an attacker with a compromised expired key) to continue being
+authenticated after the validity of its key has lapsed. A Subordinate whose
+keys have all expired cannot use this specification to rotate its keys.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<section id="section-9">
+      <h2 id="name-normative-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+      </h2>
+<dl class="references">
+<dt id="IANA.OAuth.Parameters">[IANA.OAuth.Parameters]</dt>
+      <dd>
+<span class="refAuthor">IANA</span>, <span class="refTitle">"OAuth Parameters"</span>, <time datetime="2026-03-25" class="refDate">25 March 2026</time>, <span>&lt;<a href="https://www.iana.org/assignments/oauth-parameters">https://www.iana.org/assignments/oauth-parameters</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="OpenID.Federation">[OpenID.Federation]</dt>
+      <dd>
+<span class="refAuthor">Ed., R. H.</span>, <span class="refAuthor">Jones, M. B.</span>, <span class="refAuthor">Solberg, A.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Marco, G. D.</span>, and <span class="refAuthor">V. Dzhuvinov</span>, <span class="refTitle">"OpenID Federation 1.1"</span>, <time datetime="2026-05-05" class="refDate">5 May 2026</time>, <span>&lt;<a href="https://openid.net/specs/openid-federation-1_1.html">https://openid.net/specs/openid-federation-1_1.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+      <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6749">[RFC6749]</dt>
+      <dd>
+<span class="refAuthor">Hardt, D.</span>, <span class="refTitle">"The OAuth 2.0 Authorization Framework"</span>, <time datetime="2012-10" class="refDate">October 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6749">https://www.rfc-editor.org/info/rfc6749</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7515">[RFC7515]</dt>
+      <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Signature (JWS)"</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7515">https://www.rfc-editor.org/info/rfc7515</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7517">[RFC7517]</dt>
+      <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refTitle">"JSON Web Key (JWK)"</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7517">https://www.rfc-editor.org/info/rfc7517</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7519">[RFC7519]</dt>
+      <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Token (JWT)"</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+    <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<div id="notices">
+<section id="appendix-A">
+      <h2 id="name-notices">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-notices" class="section-name selfRef">Notices</a>
+      </h2>
+<p id="appendix-A-1">Copyright (c) 2026 The OpenID Foundation.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">The OpenID Foundation (OIDF) grants to any Contributor, developer,
+implementer, or other interested party a non-exclusive, royalty free,
+worldwide copyright license to reproduce, prepare derivative works from,
+distribute, perform and display, this Implementers Draft, Final
+Specification, or Final Specification Incorporating Errata Corrections
+solely for the purposes of (i) developing specifications,
+and (ii) implementing Implementers Drafts, Final Specifications,
+and Final Specification Incorporating Errata Corrections based
+on such documents, provided that attribution be made to the OIDF as the
+source of the material, but that such attribution does not indicate an
+endorsement by the OIDF.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<p id="appendix-A-3">The technology described in this specification was made available
+from contributions from various sources, including members of the OpenID
+Foundation and others. Although the OpenID Foundation has taken steps to
+help ensure that the technology is available for distribution, it takes
+no position regarding the validity or scope of any intellectual property
+or other rights that might be claimed to pertain to the implementation
+or use of the technology described in this specification or the extent
+to which any license under such rights might or might not be available;
+neither does it represent that it has made any independent effort to
+identify any such rights. The OpenID Foundation and the contributors to
+this specification make no (and hereby expressly disclaim any)
+warranties (express, implied, or otherwise), including implied
+warranties of merchantability, non-infringement, fitness for a
+particular purpose, or title, related to this specification, and the
+entire risk as to implementing this specification is assumed by the
+implementer. The OpenID Intellectual Property Rights policy
+(found at openid.net) requires
+contributors to offer a patent promise not to assert certain patent
+claims against other contributors and against implementers.
+OpenID invites any interested party to bring to its attention any
+copyrights, patents, patent applications, or other proprietary rights
+that may cover technology that may be required to practice this
+specification.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="acknowledgements">
+<section id="appendix-B">
+      <h2 id="name-acknowledgements">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="appendix-B-1">We would like to thank the following individuals for their contributions to this specification:
+Niels van Dijk,
+Harry Kodden,
+Henri Mikkonen,
+and Davide Vaghetti<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="document-history">
+<section id="appendix-C">
+      <h2 id="name-document-history">
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-document-history" class="section-name selfRef">Document History</a>
+      </h2>
+<p id="appendix-C-1">[[ To be removed from the final specification ]]<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<p id="appendix-C-2">-00<a href="#appendix-C-2" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="appendix-C-3.1">Initial version defining the Subordinate JWKS Update Trigger Endpoint and the
+Subordinate JWKS Update Endpoint for keeping a Superior's Stored JWKS for a
+Subordinate up to date.<a href="#appendix-C-3.1" class="pilcrow">¶</a>
+</li>
+      </ul>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-D">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Gabriel Zachmann</span></div>
+<div dir="auto" class="left"><span class="org">Karlsruhe Institute of Technology</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:gabriel.zachmann@kit.edu" class="email">gabriel.zachmann@kit.edu</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
